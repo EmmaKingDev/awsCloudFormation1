@@ -64,6 +64,22 @@ Resources:
       Subnets: !Ref ALBSubnetList
       SecurityGroups:
         - !Ref EmmaALBSecurityGroup
+  EmmaTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: instance
+  EmmaALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref EmmaALBInstance
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref EmmaTargetGroup
 Outputs:
   EmmaALBEndpoint:
     Description: LoadBalancer DNS name
