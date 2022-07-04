@@ -47,3 +47,16 @@ Resources:
         - Key: Name
           Value: EmmaSecurityGroupALB
       VpcId: !Ref VPC
+  EmmaEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow port 80 from ALB security group
+      SecurityGroupIngress:
+        - SourceSecurityGroupName: EmmaStack3-EmmaALBSecurityGroup-1ELWFYJSA04US
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      Tags:
+        - Key: Name
+          Value: EmmaSecurityGroupEc2
+      VpcId: !Ref VPC
