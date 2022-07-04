@@ -3,3 +3,7 @@ Description: Academy Demo CloudFormation
 Resources:
   EmmaS3CF:
     Type: AWS::S3::Bucket
+  EmmaQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: DemoQueue
