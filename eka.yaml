@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion:
+Description: Academy Demo CloudFormation
+Resources:
+  EmmaS3CF:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: EmmaS3CF
