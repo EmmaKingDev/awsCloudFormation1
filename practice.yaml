@@ -52,7 +52,7 @@ Resources:
     Properties:
       GroupDescription: Allow port 80 from ALB security group
       SecurityGroupIngress:
-        - SourceSecurityGroupName: EmmaStack-EmmaALBSecurityGroup-18HARXQMU8Z7M
+        - SourceSecurityGroupId: !Ref EmmaALBSecurityGroup
           FromPort: 80
           IpProtocol: tcp
           ToPort: 80

@@ -3,11 +3,25 @@ EmmaEC2SecurityGroup:
   Properties:
     GroupDescription: Allow port 80 from ALB security group
     SecurityGroupIngress:
-      - SourceSecurityGroupName: EmmaStack3-EmmaALBSecurityGroup-1ELWFYJSA04US
-        FromPort: 80
+      - SourceSecurityGroupName: 
         IpProtocol: tcp
         ToPort: 80
     Tags:
       - Key: Name
         Value: EmmaSecurityGroupEc2
     VpcId: !Ref VPC
+EmmaStack-EmmaALBSecurityGroup-18HARXQMU8Z7M
+
+  EmmaALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - RedirectConfig:
+            Host: /#{host}
+            Path: /#{path}
+            Port: 443
+            Protocol: HTTPS
+            Query: /#{query}
+            StatusCode: HTTP_301
+          Type: redirect
+      LoadBalancerArn: !Ref EmmaALBInstance
