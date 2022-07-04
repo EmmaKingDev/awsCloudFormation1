@@ -2,8 +2,11 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Academy Demo CloudFormation
 Parameters:
   LatestAmiId:
-    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
-    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  ALBSubnetList:
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-05dc5323a90701745,subnet-0462080141c44392d
 Resources:
   EmmaS3CF:
     Type: AWS::S3::Bucket
@@ -12,6 +15,15 @@ Resources:
     Properties:
       QueueName: EmmaDemoQueue
   EmmaEC2:
-    Type: "AWS::EC2::Instance"
+    Type: AWS::EC2::Instance
     Properties:
       ImageId: !Ref LatestAmiId
+      Tags:
+        - Key: Name
+          Value: emz-ec2-instance
+  EmmaALBInstance:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: EmmaALBcf
+      Scheme: internet-facing
+      Subnets: !Ref ALBSubnetList
