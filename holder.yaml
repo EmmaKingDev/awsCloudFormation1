@@ -76,3 +76,15 @@ EmmaStack-EmmaALBSecurityGroup-18HARXQMU8Z7M
             StatusCode: HTTP_301
           Type: redirect
       LoadBalancerArn: !Ref EmmaALBInstance
+
+
+        EmmaALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref EmmaALBInstance
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            ContentType: "text/plain"
+            MessageBody: "You've reached the listener! Congrats!"
+            StatusCode: "503"

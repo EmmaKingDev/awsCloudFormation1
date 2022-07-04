@@ -17,19 +17,6 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: EmmaDemoQueue
-  EmmaEC2:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: !Ref LatestAmiId
-      Tags:
-        - Key: Name
-          Value: emz-ec2-instance
-  EmmaALBInstance:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Name: EmmaALBcf
-      Scheme: internet-facing
-      Subnets: !Ref ALBSubnetList
   EmmaALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -59,7 +46,24 @@ Resources:
       Tags:
         - Key: Name
           Value: EmmaSecurityGroupEc2
-      VpcId: !Ref VPC
+  EmmaEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      SecurityGroups:
+        - !Ref EmmaEC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: emz-ec2-instance
+  EmmaALBInstance:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: EmmaALBcf
+      Type: application
+      Scheme: internet-facing
+      Subnets: !Ref ALBSubnetList
+      SecurityGroups:
+        - !Ref EmmaALBSecurityGroup
 Outputs:
   EmmaALBEndpoint:
     Description: LoadBalancer DNS name
