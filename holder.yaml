@@ -88,3 +88,77 @@ EmmaStack-EmmaALBSecurityGroup-18HARXQMU8Z7M
             ContentType: "text/plain"
             MessageBody: "You've reached the listener! Congrats!"
             StatusCode: "503"
+
+
+
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Academy Demo CloudFormation
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  ALBSubnetList:
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-05dc5323a90701745,subnet-0462080141c44392d
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-02f0416e2af96dc4e
+Resources:
+  EmmaS3CF:
+    Type: AWS::S3::Bucket
+  EmmaQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: EmmaDemoQueue
+  EmmaALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow incoming from anywhere to HTTPS and HTTP
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+        - CidrIp: 0.0.0.0/0
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      Tags:
+        - Key: Name
+          Value: EmmaSecurityGroupALB
+      VpcId: !Ref VPC
+  EmmaEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow port 80 from ALB security group
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref EmmaALBSecurityGroup
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      Tags:
+        - Key: Name
+          Value: EmmaSecurityGroupEc2
+  EmmaEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      SecurityGroups:
+        - !Ref EmmaEC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: emz-ec2-instance
+  EmmaALBInstance:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: EmmaALBcf
+      Type: application
+      Scheme: internet-facing
+      Subnets: !Ref ALBSubnetList
+      SecurityGroups:
+        - !Ref EmmaALBSecurityGroup
+Outputs:
+  EmmaALBEndpoint:
+    Description: LoadBalancer DNS name
+    Value: !GetAtt EmmaALBInstance.DNSName
