@@ -46,15 +46,6 @@ Resources:
       Tags:
         - Key: Name
           Value: EmmaSecurityGroupEc2
-  EmmaEC2:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: !Ref LatestAmiId
-      SecurityGroups:
-        - !Ref EmmaEC2SecurityGroup
-      Tags:
-        - Key: Name
-          Value: emz-ec2-instance
   EmmaALBInstance:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -64,6 +55,21 @@ Resources:
       Subnets: !Ref ALBSubnetList
       SecurityGroups:
         - !Ref EmmaALBSecurityGroup
+  EmmaLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref EmmaEC2SecurityGroup
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - "\n"
+            - - "#!/bin/bash"
+              - "amazon-linux-extras install epel"
+              - "amazon-linux-extras install nginx1"
+              - "systemctl start nginx"
   EmmaTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
