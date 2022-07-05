@@ -55,21 +55,6 @@ Resources:
       Subnets: !Ref ALBSubnetList
       SecurityGroups:
         - !Ref EmmaALBSecurityGroup
-  EmmaLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Properties:
-      ImageId: !Ref LatestAmiId
-      InstanceType: t2.micro
-      SecurityGroups:
-        - !Ref EmmaEC2SecurityGroup
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - "\n"
-            - - "#!/bin/bash"
-              - "amazon-linux-extras install epel"
-              - "amazon-linux-extras install nginx1"
-              - "systemctl start nginx"
   EmmaTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -86,6 +71,35 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref EmmaTargetGroup
+  EmmaLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !GetAtt EmmaEC2SecurityGroup.GroupId
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - "\n"
+            - - "#!/bin/bash"
+              - "amazon-linux-extras install epel"
+              - "amazon-linux-extras install nginx1"
+              - "systemctl start nginx"
+  EmmaASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      MinSize: 2
+      MaxSize: 2
+      DesiredCapacity: 2
+      VPCZoneIdentifier: !Ref ALBSubnetList
+      LaunchConfigurationName: !Ref EmmaLaunchConfig
+      TargetGroupARNs:
+        - !Ref EmmaTargetGroup
+      Tags:
+        - Key: Name
+          Value: EmmaASG
+          PropagateAtLaunch: "true"
 Outputs:
   EmmaALBEndpoint:
     Description: LoadBalancer DNS name
